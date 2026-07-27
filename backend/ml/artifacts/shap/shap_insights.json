@@ -1,0 +1,77 @@
+{
+  "model_type": "logreg",
+  "n_samples_explained": 100,
+  "generated_at": "2026-06-13T16:20:21.110418",
+  "top_drivers": [
+    {
+      "rank": 1,
+      "feature": "num__YearsSinceLastPromotion",
+      "importance": 0.6413532362890877,
+      "mean_effect": 0.11754224590436442,
+      "direction": "augmente"
+    },
+    {
+      "rank": 2,
+      "feature": "num__JobSatisfaction",
+      "importance": 0.576351786110472,
+      "mean_effect": -0.020409057581815642,
+      "direction": "diminue"
+    },
+    {
+      "rank": 3,
+      "feature": "num__NumCompaniesWorked",
+      "importance": 0.5440562353935975,
+      "mean_effect": -0.08758481062207527,
+      "direction": "diminue"
+    },
+    {
+      "rank": 4,
+      "feature": "num__YearsWithCurrManager",
+      "importance": 0.4539601084654187,
+      "mean_effect": -0.12478203062881404,
+      "direction": "diminue"
+    },
+    {
+      "rank": 5,
+      "feature": "num__EnvironmentSatisfaction",
+      "importance": 0.43882122925303946,
+      "mean_effect": 0.023984544668399593,
+      "direction": "augmente"
+    },
+    {
+      "rank": 6,
+      "feature": "num__TotalWorkingYears",
+      "importance": 0.3896738913921542,
+      "mean_effect": -0.021140588167213044,
+      "direction": "diminue"
+    },
+    {
+      "rank": 7,
+      "feature": "num__WorkloadIndex",
+      "importance": 0.3774720701294101,
+      "mean_effect": 0.053148445418721636,
+      "direction": "augmente"
+    },
+    {
+      "rank": 8,
+      "feature": "cat__JobRole_Laboratory Technician",
+      "importance": 0.3617671771280236,
+      "mean_effect": -0.03932251925304603,
+      "direction": "diminue"
+    },
+    {
+      "rank": 9,
+      "feature": "num__SatRisk",
+      "importance": 0.3054289548314712,
+      "mean_effect": 0.019988805944467992,
+      "direction": "augmente"
+    },
+    {
+      "rank": 10,
+      "feature": "cat__OverTime_No",
+      "importance": 0.2932524055154234,
+      "mean_effect": 0.007717168566195334,
+      "direction": "augmente"
+    }
+  ]
+}

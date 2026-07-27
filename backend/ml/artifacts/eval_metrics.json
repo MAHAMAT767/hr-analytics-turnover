@@ -1,0 +1,24 @@
+{
+  "model_name": "logreg",
+  "threshold": 0.41998322423442513,
+  "version": "20260613_160813",
+  "evaluation_date": "2026-06-13T16:20:13.589495",
+  "technical_metrics": {
+    "roc_auc": 0.8042897751744336,
+    "f1": 0.4861111111111111,
+    "precision": 0.36082474226804123,
+    "recall": 0.7446808510638298
+  },
+  "confusion_matrix": {
+    "true_negatives": 185,
+    "false_positives": 62,
+    "false_negatives": 12,
+    "true_positives": 35
+  },
+  "business_metrics": {
+    "cost_per_turnover": 15000,
+    "cost_intervention": 350,
+    "estimated_savings": 491050.0,
+    "intervention_cost": 33950.0
+  }
+}

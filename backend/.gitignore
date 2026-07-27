@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.pyc
+ml/artifacts/*.pkl
+ml/artifacts/*.png
+data/
+logs/

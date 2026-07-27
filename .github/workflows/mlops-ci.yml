@@ -1,0 +1,167 @@
+name: MLOps CI/CD — HR Turnover
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:   # Déclenchement manuel possible
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 1 : Qualité du code
+  # ────────────────────────────────────────────────────────────────────────────
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install linters
+        run: pip install flake8 black isort
+
+      - name: Run flake8
+        run: flake8 backend/app backend/ml --max-line-length=120 --ignore=E501,W503
+        continue-on-error: true
+
+      - name: Check formatting (black)
+        run: black --check backend/app backend/ml --line-length=120
+        continue-on-error: true
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 2 : Tests unitaires
+  # ────────────────────────────────────────────────────────────────────────────
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install pytest pytest-cov httpx
+
+      - name: Run tests
+        run: |
+          cd backend
+          pytest tests/ -v --cov=app --cov-report=xml --cov-report=term-missing
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: backend/coverage.xml
+        continue-on-error: true
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 3 : Pipeline ML (entraînement + évaluation)
+  # Déclenché seulement sur main ou manuellement
+  # ────────────────────────────────────────────────────────────────────────────
+  ml-pipeline:
+    name: ML Pipeline
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Run ML pipeline (train + eval, sans SHAP en CI)
+        run: |
+          cd backend
+          python ml/run_all.py --skip-shap
+        env:
+          PYTHONPATH: .
+
+      - name: Check model quality gate
+        run: |
+          cd backend
+          python -c "
+          import json
+          from pathlib import Path
+          metrics = json.loads(Path('ml/artifacts/eval_metrics.json').read_text())
+          roc = metrics['technical_metrics']['roc_auc']
+          recall = metrics['technical_metrics']['recall']
+          print(f'ROC-AUC: {roc:.4f} | Recall: {recall:.4f}')
+          assert roc >= 0.70, f'ROC-AUC insuffisant: {roc:.4f} < 0.70'
+          assert recall >= 0.60, f'Recall insuffisant: {recall:.4f} < 0.60'
+          print('✓ Quality gate passée')
+          "
+
+      - name: Save model artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-artifacts-${{ github.sha }}
+          path: |
+            backend/ml/artifacts/model.pkl
+            backend/ml/artifacts/metadata.json
+            backend/ml/artifacts/eval_metrics.json
+          retention-days: 30
+
+      - name: Save MLflow runs
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlruns-${{ github.sha }}
+          path: backend/mlruns/
+          retention-days: 30
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 4 : Build & vérification Docker
+  # ────────────────────────────────────────────────────────────────────────────
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: ml-pipeline
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download model artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: model-artifacts-${{ github.sha }}
+          path: backend/ml/artifacts/
+
+      - name: Build Docker image
+        run: docker build -t hr-analytics-mlops:${{ github.sha }} ./backend
+
+      - name: Test Docker container
+        run: |
+          docker run -d -p 8000:8000 \
+            -e HF_TOKEN=${{ secrets.HF_TOKEN }} \
+            --name test-container \
+            hr-analytics-mlops:${{ github.sha }}
+          sleep 10
+          curl -f http://localhost:8000/health || exit 1
+          curl -f http://localhost:8000/mlops/health || exit 1
+          docker stop test-container
