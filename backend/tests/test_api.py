@@ -98,6 +98,7 @@ class TestFeatureEngineering:
         df = pd.DataFrame({
             "OverTime": ["Yes", "Yes", "No", "No"],
             "WorkLifeBalance": [1, 3, 1, 3],
+            "JobSatisfaction": [3, 3, 3, 3],
             "MonthlyIncome": [3000, 3000, 3000, 3000],
             "YearsAtCompany": [2, 2, 2, 2],
             "TotalWorkingYears": [5, 5, 5, 5],
@@ -165,7 +166,7 @@ class TestModelService:
 
         mock_pipeline = MagicMock()
 
-        for proba, expected_level in [(0.10, "faible"), (0.35, "moyen"), (0.60, "eleve")]:
+        for proba, expected_level in [(0.10, "faible"), (0.35, "moyen"), (0.60, "élevé")]:
             mock_pipeline.predict_proba.return_value = np.array([[1 - proba, proba]])
             with patch.object(model_service, "pipeline", mock_pipeline):
                 result = model_service.predict(EmployeData(**sample_employe))
@@ -234,14 +235,14 @@ class TestAPI:
 
     def test_predict_endpoint_structure(self, client, sample_employe):
         """Vérifie que /predict retourne les bons champs."""
-        response = client.post("/predict", json=sample_employe)
+        response = client.post("/api/predict", json=sample_employe)
         assert response.status_code == 200
         data = response.json()
         assert "probabilite"  in data
         assert "niveau_risque" in data
 
     def test_stats_endpoint(self, client):
-        response = client.get("/stats")
+        response = client.get("/api/stats")
         assert response.status_code == 200
         data = response.json()
         assert "total_employes"  in data
