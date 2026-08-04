@@ -4,14 +4,12 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getDataset } from '../api/client';
-import { getRisqueBadge } from '../components/ui/Badge';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, Cell, CartesianGrid,
   ScatterChart, Scatter, ZAxis,
 } from 'recharts';
-import { ChartTooltip } from '../components/ui/ChartTooltip';
 import { ExportButton  } from '../components/ui/ExportButton';
 
 // ─────────────────────────────────────────────────────────────────────────────

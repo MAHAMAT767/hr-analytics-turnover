@@ -136,7 +136,6 @@ def compute_survival(data: EmployeData) -> dict:
 
             except Exception as e:
                 logger.warning(f"RSF predict failed, fallback Weibull: {e}")
-                RSF_AVAILABLE_LOCAL = False
                 times_w, surv_w, lam = _weibull_survival_curve(proba, anciennete_mois)
                 delai, ic_bas, ic_haut, courbe, source = _from_weibull(
                     times_w, surv_w, lam, proba, anciennete_mois

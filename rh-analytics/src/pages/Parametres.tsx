@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   Save, RefreshCw, CheckCircle, XCircle, Loader,
-  ChevronDown, ChevronUp, GitBranch, Database,
+  ChevronDown, GitBranch, Database,
   Cpu, Activity, Shield, Zap,
 } from 'lucide-react';
 import { getMonitoring, getModelInfo, getMetrics, getDrift, getMlflowSummary, getMlflowRun } from '../api/client';

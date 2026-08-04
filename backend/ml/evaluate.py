@@ -27,7 +27,7 @@ COST_PER_TURNOVER = 15_000
 COST_INTERVENTION = 350
 
 
-#  FIX : importer build_features depuis train.py pour désérialiser le pipeline
+# build_features doit être importable pour que joblib puisse désérialiser le pipeline
 import sys as _sys
 _sys.path.insert(0, str(Path(__file__).parent))
 from train import build_features  # noqa: F401 — nécessaire pour joblib.load()
@@ -59,7 +59,6 @@ def load_test_data():
 def evaluate():
     logger.info("Démarrage de l'évaluation...")
     mlflow.set_tracking_uri(f"sqlite:///{DB_PATH.absolute()}")
-    # set_experiment commenté : on logue dans le run existant via run_id
 
     model, metadata, version = load_latest_model()
     X_test, y_test = load_test_data()
@@ -105,7 +104,7 @@ def evaluate():
         },
     }
 
-    # Log dans le run MLflow original si disponible
+    # On logue dans le run d'entraînement d'origine s'il est connu
     with mlflow.start_run(run_id=run_id) if run_id else mlflow.start_run(run_name=f"eval_{version}") as run:
         mlflow.log_metrics({
             "eval_roc_auc":           round(roc, 4),
@@ -118,7 +117,6 @@ def evaluate():
         eval_path.write_text(json.dumps(metrics, indent=2))
         mlflow.log_artifact(str(eval_path), artifact_path="evaluation")
 
-    # Affichage
     print("\n" + "=" * 60)
     print("ÉVALUATION DU MODÈLE")
     print("=" * 60)

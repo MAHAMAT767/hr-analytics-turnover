@@ -3,7 +3,6 @@ tests/test_api.py — Tests de l'API FastAPI et du pipeline ML
 """
 
 import pytest
-import json
 import numpy as np
 import pandas as pd
 from pathlib import Path

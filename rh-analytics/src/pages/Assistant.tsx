@@ -586,8 +586,8 @@ export default function Assistant() {
               _anciennete: emp?.YearsAtCompany ?? 0,
             };
           } catch (e: any) {
-            // Employé introuvable dans le dataset (ou API indisponible) → on retombe
-            // sur l'ancien comportement : le backend tentera sa propre résolution.
+            // Employé introuvable dans le dataset (ou API indisponible) : on transmet
+            // l'ID brut et le backend tentera sa propre résolution.
             console.warn("Analyse employé côté frontend impossible :", e?.message ?? e);
             contexte_rh = { employee_number: detectedId };
           }

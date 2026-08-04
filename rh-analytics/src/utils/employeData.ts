@@ -2,10 +2,8 @@
 // Conversion d'une ligne brute du dataset (CSV) vers le format EmployeData
 // attendu par /api/predict, /api/explain et /api/survival.
 //
-// Extrait de src/pages/Analyseshap.tsx pour être partagé avec
-// src/hooks/useEmployeeAnalysis.ts (Analyseshap.tsx ET Assistant.tsx
-// doivent produire exactement le même payload pour garantir des résultats
-// identiques sur les deux pages).
+// Point de passage unique : tout appelant doit produire le même payload, sans
+// quoi les résultats divergent d'une page à l'autre.
 
 export function toEmployeData(e: any): Record<string, any> {
   return {

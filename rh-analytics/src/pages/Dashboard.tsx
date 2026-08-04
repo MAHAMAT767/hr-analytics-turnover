@@ -5,7 +5,6 @@ import {
   UsersIcon, TrendingDownIcon, AlertTriangleIcon, StarIcon,
   DollarSignIcon, ClockIcon, InfoIcon, ChevronDownIcon, CloseIcon,
 } from '../components/ui/Icons';
-import { getRisqueBadge } from '../components/ui/Badge';
 import { ChartTooltip }   from '../components/ui/ChartTooltip';
 import { ExportButton }   from '../components/ui/ExportButton';
 import {
@@ -16,51 +15,8 @@ import {
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// UTILITAIRES D'ACCESSIBILITÉ
-// ─────────────────────────────────────────────────────────────────────────────
-
-/** Respecte la préférence système "réduire les animations" pour les effets continus */
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReduced(mq.matches);
-    const handler = () => setReduced(mq.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-  return reduced;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // COMPOSANTS D'ANIMATION & D'AMBIANCE
 // ─────────────────────────────────────────────────────────────────────────────
-
-/** Halo lumineux qui tourne autour d'un card — réservé à l'élément le plus critique */
-const BorderBeam = ({ color = 'var(--primary-light)', duration = 9 }: { color?: string; duration?: number }) => {
-  const reduced = usePrefersReducedMotion();
-  return (
-    <div style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
-      <motion.div
-        style={{
-          position: 'absolute',
-          width: 70, height: '220%', top: '-60%',
-          background: `conic-gradient(transparent 205deg, ${color}, transparent 360deg)`,
-          filter: 'blur(2px)',
-          opacity: 0.55,
-        }}
-        animate={reduced ? {} : { rotate: [0, 360] }}
-        transition={{ duration, repeat: Infinity, ease: 'linear' }}
-      />
-      <div style={{ position: 'absolute', inset: 1, borderRadius: 'inherit', background: 'var(--card)', zIndex: 1 }} />
-    </div>
-  );
-};
-
-// (SpotlightCard a été retiré : le halo qui suit le curseur était appliqué
-// uniformément aux 7 cartes graphiques, ce qui n'apportait aucune lisibilité
-// supplémentaire et alourdissait le rendu. Les cartes ci-dessous sont
-// redevenues de simples <div> portant le même style.)
 
 /** Card animé avec reveal au scroll */
 const AnimatedCard = ({
@@ -112,18 +68,6 @@ function AnimatedNumber({
     </span>
   );
 }
-
-/** Barre de progression animée (utilisée dans le tableau des profils à risque) */
-const AnimatedBar = ({ pct, color }: { pct: number; color: string }) => (
-  <div style={{ height: 3, background: 'var(--border)', borderRadius: 3, overflow: 'hidden', minWidth: 45 }}>
-    <motion.div
-      initial={{ width: 0 }}
-      animate={{ width: `${pct}%` }}
-      transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
-      style={{ height: '100%', borderRadius: 3, background: color }}
-    />
-  </div>
-);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PREMIUM KPI CARD — version améliorée avec gauge, sparkline & animations
@@ -457,7 +401,7 @@ function HealthStatusPill({ taux }: { taux: number }) {
   );
 }
 
-// ── Helpers métier (inchangés) ──────────────────────────────────────────
+// ── Helpers métier ──────────────────────────────────────────────────────
 function getRisque(e: any): string {
   let s = 0;
   if (e.OverTime === 'Yes')   s += 2;
@@ -731,7 +675,6 @@ function TurnoverDonut({
   const R_INNER = 50;
   const GAP_DEG = 3; // gap en degrés entre les deux arcs
 
-  // Conversion degrés → radians
   const toRad = (deg: number) => (deg * Math.PI) / 180;
 
   // Arc path SVG (grand arc si > 180°)
@@ -746,18 +689,12 @@ function TurnoverDonut({
     return `M${x1o},${y1o} A${rO},${rO} 0 ${large} 1 ${x2o},${y2o} L${x1i},${y1i} A${rI},${rI} 0 ${large} 0 ${x2i},${y2i} Z`;
   };
 
-  // Angles
   const turnoverDeg = turnover * 3.6;
   const gapHalf = GAP_DEG / 2;
   const tStart = gapHalf;
   const tEnd   = turnoverDeg - gapHalf;
   const rStart = turnoverDeg + gapHalf;
   const rEnd   = 360 - gapHalf;
-
-  // Circumference pour l'arc animé (stroke-dasharray trick sur un cercle fictif)
-  const CIRC = 2 * Math.PI * ((R_OUTER + R_INNER) / 2);
-  const tFrac = turnover / 100;
-  const rFrac = retention / 100;
 
   // Point central de l'arc turnover (pour le label inline)
   const tMidDeg = (tStart + tEnd) / 2 - 90;

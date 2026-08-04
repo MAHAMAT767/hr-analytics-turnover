@@ -1,12 +1,9 @@
 """
-app/api/routes/stats.py
-✅ FIX #3 : ajout de turnover_par_dept (dict département → taux)
-  attendu par Analytics.tsx ligne : stat.turnover_par_dept
-✅ FIX #4 : ajout de evolution (liste de 12 mois {mois, taux})
-  attendu par Dashboard.tsx -> <AreaChart data={stat?.evolution || []}>
-  Le dataset IBM HR Analytics n'a pas de dimension temporelle réelle,
-  on génère donc une évolution simulée mais reproductible (seed fixe),
-  ancrée sur le taux de turnover réel calculé sur les données.
+app/api/routes/stats.py — Statistiques agrégées du dataset
+
+Attention : le dataset IBM HR Analytics n'a aucune dimension temporelle réelle.
+Le champ `evolution` est donc une série simulée — reproductible via une seed
+fixe et ancrée sur le taux de turnover réellement calculé sur les données.
 """
 
 from fastapi import APIRouter
@@ -22,7 +19,6 @@ def stats():
     df = pd.read_csv(settings.DATA_PATH)
     df['Attrition_num'] = df['Attrition'].map({'Yes': 1, 'No': 0})
 
-    # ✅ taux de turnover par département (ajout)
     turnover_par_dept = (
         df.groupby('Department')['Attrition_num']
         .mean()
@@ -32,7 +28,7 @@ def stats():
 
     taux_turnover = round(df['Attrition_num'].mean() * 100, 1)
 
-    # ✅ FIX #4 : évolution sur 12 mois (estimée depuis le taux réel)
+    # Évolution sur 12 mois, estimée depuis le taux réel
     mois_labels = ['Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc',
                     'Jan', 'Fév', 'Mars', 'Avr', 'Mai', 'Juin']
     rng = np.random.default_rng(42)  # seed fixe -> évolution stable au reload
@@ -50,6 +46,6 @@ def stats():
         "taux_turnover":     taux_turnover,
         "nb_departs":        int(df['Attrition_num'].sum()),
         "salaire_moyen":     round(df['MonthlyIncome'].mean(), 0),
-        "turnover_par_dept": turnover_par_dept,   # ✅ ajouté
-        "evolution":         evolution,           # ✅ ajouté
+        "turnover_par_dept": turnover_par_dept,
+        "evolution":         evolution,
     }

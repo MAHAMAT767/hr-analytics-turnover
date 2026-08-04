@@ -1,10 +1,5 @@
 """
 app/services/model_service.py — Service de prédiction
-✅ FIX #6 : feature_importance() renvoie maintenant aussi "source"
-  (soit "feature_importances" pour RF, soit "coefficients" pour logreg)
-  attendu par Explicabilite.tsx : res?.data?.source et res?.data?.model
-✅ FIX #7 : employe_to_dataframe() — Gender converti en string 'Male'/'Female'
-  avant d'être passé au pipeline (OneHotEncoder entraîné sur des strings)
 """
 
 import json
@@ -20,12 +15,12 @@ from app.schemas.employe import EmployeData
 
 logger = logging.getLogger(__name__)
 
-# ⭐⭐⭐ AJOUT CRITIQUE : Ajouter le chemin ml/ pour pouvoir importer build_features
+# ml/ doit être sur le sys.path pour pouvoir importer build_features
 backend_path = Path(__file__).parent.parent.parent
 ml_path = backend_path / "ml"
 sys.path.insert(0, str(ml_path))
 
-# ✅ FIX pickle : build_features doit être définie dans ce module ET injectée dans
+# build_features doit être définie dans ce module ET injectée dans
 # sys.modules["__main__"] avant joblib.load(). Le pipeline a été sérialisé avec
 # build_features appartenant à __main__ (train.py lancé comme script), donc pickle
 # la cherche dans __main__ à la désérialisation.
@@ -40,7 +35,7 @@ def build_features(X: pd.DataFrame) -> pd.DataFrame:
     X = X.replace([np.inf, -np.inf], 0).fillna(0)
     return X
 
-# ✅ Injection dans __main__ — requis par pickle pour la désérialisation
+# Injection dans __main__ — requis par pickle pour la désérialisation
 sys.modules["__main__"].build_features = build_features
 logger.info("✓ build_features injectée dans __main__ pour désérialisation pickle")
 
@@ -74,8 +69,9 @@ except Exception as e:
 
 # ── Conversion EmployeData → DataFrame brut ───────────────────────────────────
 def employe_to_dataframe(data: EmployeData) -> pd.DataFrame:
+    # Gender doit être une string : l'OneHotEncoder a été entraîné sur 'Male'/'Female'
     overtime_str = "Yes" if data.OverTime == 1 else "No"
-    gender_str   = "Male" if data.Gender == 1 else "Female"  # ✅ FIX #7
+    gender_str   = "Male" if data.Gender == 1 else "Female"
 
     row = {
         "Age":                      data.Age,
@@ -83,7 +79,7 @@ def employe_to_dataframe(data: EmployeData) -> pd.DataFrame:
         "DistanceFromHome":         data.DistanceFromHome,
         "Education":                data.Education,
         "EnvironmentSatisfaction":  data.EnvironmentSatisfaction,
-        "Gender":                   gender_str,               # ✅ FIX #7 — était data.Gender (int)
+        "Gender":                   gender_str,
         "HourlyRate":               data.HourlyRate,
         "JobInvolvement":           data.JobInvolvement,
         "JobLevel":                 data.JobLevel,
@@ -105,7 +101,7 @@ def employe_to_dataframe(data: EmployeData) -> pd.DataFrame:
         "BusinessTravel":           data.BusinessTravel,
         "Department":               data.Department,
         "EducationField":           data.EducationField,
-        "Gender_str":               gender_str,               # ✅ cohérent avec Gender
+        "Gender_str":               gender_str,
         "JobRole":                  data.JobRole,
         "MaritalStatus":            data.MaritalStatus,
         "OverTime":                 overtime_str,
@@ -134,7 +130,7 @@ def predict(data: EmployeData) -> dict:
             niveau  = "moyen"
             couleur = "orange"
         else:
-            # ✅ FIX : le frontend attend "élevé" (avec accent), pas "eleve"
+            # Le frontend attend "élevé" avec l'accent — ne pas normaliser
             niveau  = "élevé"
             couleur = "red"
 
@@ -150,7 +146,6 @@ def predict(data: EmployeData) -> dict:
             "version":            metadata.get("version", "?"),
         }
 
-        # Log JSON des prédictions
         try:
             log_entry = {
                 "timestamp": datetime.now().isoformat(),
@@ -179,10 +174,10 @@ def predict(data: EmployeData) -> dict:
 # ── Feature importance ────────────────────────────────────────────────────────
 def feature_importance() -> dict:
     """
-    ✅ FIX #6 : renvoie maintenant aussi "source"
-    - "feature_importances" pour RandomForest
-    - "coefficients"        pour LogisticRegression
-    Attendu par Explicabilite.tsx : res?.data?.source
+    Importance des features du modèle courant.
+
+    Le champ "source" indique la méthode employée :
+    "feature_importances" (RandomForest) ou "coefficients" (LogisticRegression).
     """
     if pipeline is None:
         return {"features": [], "message": "Modèle non chargé"}
@@ -224,7 +219,7 @@ def feature_importance() -> dict:
 
         return {
             "model":    MODEL_NAME,
-            "source":   source,          # ✅ ajouté
+            "source":   source,
             "features": [
                 {"feature": str(k), "importance": float(v)}
                 for k, v in importances.items()
@@ -239,7 +234,6 @@ def feature_importance() -> dict:
 # ── Métriques du modèle courant ───────────────────────────────────────────────
 def get_model_metrics() -> dict:
     eval_path = Path(settings.get_absolute_path("ml/artifacts/eval_metrics.json"))
-    meta_path = Path(settings.METADATA_PATH)
 
     result = {
         "model_name": MODEL_NAME,

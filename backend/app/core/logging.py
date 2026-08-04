@@ -1,8 +1,7 @@
 import logging
 import json
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict
+from typing import Dict
 from .config import settings
 
 class JSONFormatter(logging.Formatter):
@@ -19,11 +18,9 @@ class JSONFormatter(logging.Formatter):
             "line": record.lineno,
         }
         
-        # Ajouter les exceptions si présentes
         if record.exc_info:
             log_entry["exception"] = self.formatException(record.exc_info)
-        
-        # Ajouter les extra fields
+
         if hasattr(record, "extra_data"):
             log_entry["extra"] = record.extra_data
         
@@ -41,7 +38,6 @@ def setup_logging():
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     ))
     
-    # Configuration root logger
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO if not settings.DEBUG else logging.DEBUG)
     root_logger.addHandler(json_handler)

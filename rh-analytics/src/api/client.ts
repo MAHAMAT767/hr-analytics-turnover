@@ -1,6 +1,4 @@
 // src/api/client.ts
-// ✅ MODIFICATION : ajout de `explain` (POST /api/explain) manquant
-// Toutes les autres fonctions sont conservées à l'identique.
 
 import axios from 'axios';
 
@@ -11,8 +9,8 @@ export const API = axios.create({
 
 export const getStats      = ()          => API.get('/api/stats');
 export const predict       = (data: any) => API.post('/api/predict', data);
-export const explain       = (data: any) => API.post('/api/explain', data); // ← AJOUT
-export const survival      = (data: any) => API.post('/api/survival', data); // ← AJOUT
+export const explain       = (data: any) => API.post('/api/explain', data);
+export const survival      = (data: any) => API.post('/api/survival', data);
 export const chatMessage   = (data: any) => API.post('/api/chat', data);
 export const getDataset    = ()          => API.get('/api/dataset');
 export const getFeatureImp = ()          => API.get('/api/feature-importance');

@@ -166,7 +166,6 @@ def run_monitoring(production_df: pd.DataFrame = None) -> dict:
     2. Compare avec les données de production (si fournies)
     3. Sauvegarde le rapport
     """
-    from pathlib import Path as P
     split_path = ARTIFACTS_DIR / "splits" / "test_data.joblib"
 
     if not split_path.exists():

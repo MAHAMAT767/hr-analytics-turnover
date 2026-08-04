@@ -1,14 +1,7 @@
 """
-app/api/routes/dataset.py
-✅ FIX #2 : la réponse inclut maintenant :
-  - employes      : liste complète des 1470 employés (avec tous leurs champs)
-  - heures_sup    : taux de turnover selon OverTime
-  - satisf_turn   : taux de turnover par niveau de satisfaction (1-4)
-  - poste_turn    : taux de turnover par JobRole
-  - dist_turn     : taux de turnover par tranche de distance
-  - dist_age      : distribution {tranche, total, departs} par tranche d'âge
-  - dist_sal      : distribution {tranche, total, departs} par tranche salariale
-  - total_employes, colonnes, apercu (conservés pour compatibilité)
+app/api/routes/dataset.py — Exposition du dataset et de ses agrégats métier
+(taux de turnover par heures supplémentaires, satisfaction, poste, distance,
+et distributions par tranche d'âge et de salaire).
 """
 
 from fastapi import APIRouter

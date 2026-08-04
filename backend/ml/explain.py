@@ -27,7 +27,7 @@ DB_PATH       = BASE_DIR / "mlflow.db"
 SHAP_DIR.mkdir(parents=True, exist_ok=True)
 
 
-# ✅ FIX : importer build_features depuis train.py pour désérialiser le pipeline
+# build_features doit être importable pour que joblib puisse désérialiser le pipeline
 import sys as _sys
 _sys.path.insert(0, str(Path(__file__).parent))
 from train import build_features  # noqa: F401 — nécessaire pour joblib.load()
@@ -50,9 +50,8 @@ def generate_shap_explanations():
     logger.info("Génération des explications SHAP...")
 
     mlflow.set_tracking_uri(f"sqlite:///{DB_PATH.absolute()}")
-    # set_experiment commenté : on logue dans le run existant via run_id
 
-    # Charger métadonnées pour récupérer le run_id
+    # On logue dans le run d'entraînement existant, retrouvé via son run_id
     meta_path = ARTIFACTS_DIR / "metadata.json"
     run_id    = None
     if meta_path.exists():

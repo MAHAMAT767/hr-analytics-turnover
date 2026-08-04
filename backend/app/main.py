@@ -79,14 +79,14 @@ app.add_middleware(
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Routes avec préfixe /api
-app.include_router(predict.router)   
-app.include_router(stats.router)     
-app.include_router(dataset.router)   
-app.include_router(chat.router)      
-app.include_router(mlops.router)     
+app.include_router(predict.router)
+app.include_router(stats.router)
+app.include_router(dataset.router)
+app.include_router(chat.router)
+app.include_router(mlops.router)
 
 
-# ── ✅ FIX #6 : WebSocket /ws/network ───────────────────────────────────
+# ── WebSocket de monitoring temps réel ──────────────────────────────────
 
 BACKEND_ROOT     = Path(__file__).resolve().parent.parent
 MODEL_PATH       = BACKEND_ROOT / "ml" / "artifacts" / "model.pkl"

@@ -1,8 +1,7 @@
 """
-ml/train.py — Pipeline d'entraînement avec MLflow Tracking (version corrigée)
+ml/train.py — Pipeline d'entraînement avec MLflow Tracking
 """
 
-import os
 import json
 import warnings
 import logging
@@ -31,7 +30,7 @@ import joblib
 
 warnings.filterwarnings("ignore")
 
-#  Configuration MLflow avec SQLite 
+# ─── MLflow (backend SQLite) ────────────────────────────────────────────────
 BASE_DIR = Path(__file__).parent.parent
 MLRUNS_DIR = BASE_DIR / "mlruns"
 DB_PATH = BASE_DIR / "mlflow.db"
@@ -45,7 +44,6 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # ─── Chemins ────────────────────────────────────────────────────────────────
-# Note : Ne plus utiliser MLRUNS_DIR défini plus haut, garder le même
 ARTIFACTS_DIR = Path(__file__).parent / "artifacts"
 MODELS_DIR = ARTIFACTS_DIR / "models"
 SPLITS_DIR = ARTIFACTS_DIR / "splits"
@@ -64,7 +62,7 @@ EXPERIMENT_NAME = "hr_turnover_prediction"
 np.random.seed(RANDOM_STATE)
 
 
-# ─── Feature Engineering (inchangé) ─────────────────────────────────────────
+# ─── Feature Engineering ────────────────────────────────────────────────────
 def build_features(X: pd.DataFrame) -> pd.DataFrame:
     X = X.copy()
     X["SalaryPerYear"] = X["MonthlyIncome"] / (X["YearsAtCompany"] + 1)
@@ -77,7 +75,7 @@ def build_features(X: pd.DataFrame) -> pd.DataFrame:
     return X
 
 
-# ─── Chargement (inchangé) ──────────────────────────────────────────────────
+# ─── Chargement ─────────────────────────────────────────────────────────────
 def load_data() -> tuple:
     path = BASE_DIR / "data" / "WA_Fn-UseC_-HR-Employee-Attrition.csv"
     if not path.exists():
@@ -91,7 +89,7 @@ def load_data() -> tuple:
     return X, y
 
 
-# ─── Pipeline factory (inchangé) ────────────────────────────────────────────
+# ─── Pipeline factory ───────────────────────────────────────────────────────
 def make_pipeline(X_sample: pd.DataFrame, model) -> ImbPipeline:
     X_fe = build_features(X_sample)
     num_cols = X_fe.select_dtypes(include=["int64", "float64"]).columns.tolist()
@@ -113,7 +111,7 @@ def make_pipeline(X_sample: pd.DataFrame, model) -> ImbPipeline:
     ])
 
 
-# ─── Optimisation du seuil (inchangé) ───────────────────────────────────────
+# ─── Optimisation du seuil ──────────────────────────────────────────────────
 def optimize_threshold(y_true, y_proba, target_recall: float = TARGET_RECALL) -> float:
     precisions, recalls, thresholds = precision_recall_curve(y_true, y_proba)
     valid = recalls[:-1] >= target_recall
@@ -128,15 +126,11 @@ def optimize_threshold(y_true, y_proba, target_recall: float = TARGET_RECALL) ->
 
 # ─── Pipeline principal ─────────────────────────────────────────────
 def train(run_name: str = None):
-    """Pipeline d'entraînement avec MLflow tracking (version corrigée)"""
-    
-    
-    
+    """Pipeline d'entraînement avec MLflow tracking."""
     with mlflow.start_run(run_name=run_name or f"train_{datetime.now().strftime('%Y%m%d_%H%M%S')}") as run:
         run_id = run.info.run_id
         logger.info(f"MLflow run_id: {run_id}")
-        
-        
+
         mlflow.set_tag("mlflow.experiment", EXPERIMENT_NAME)
         mlflow.set_tag("model_type", "turnover_prediction")
         
@@ -263,20 +257,17 @@ def train(run_name: str = None):
         with open(MODELS_DIR / "current_version.txt", "w") as f:
             f.write(version)
 
-        #  MODIFICATION IMPORTANTE : Log du modèle sans registered_model_name
+        # Le modèle est loggé sans registered_model_name : le model registry
+        # n'est pas supporté par le backend SQLite utilisé ici.
         signature = infer_signature(X_train.head(5), best_pipeline.predict_proba(X_train.head(5)))
-        
-        # Version corrigée - sans registered_model_name
         mlflow.sklearn.log_model(
             sk_model=best_pipeline,
             artifact_path="model",
             signature=signature,
-            # registered_model_name=f"hr_turnover_{best_name}",  ← COMMENTÉ / SUPPRIMÉ
         )
-        
-        # Alternative : Log avec un nom de modèle personnalisé via un artefact
         mlflow.log_text(f"Model: {best_name}\nVersion: {version}", "model_info.txt")
-        
+
+
         mlflow.log_artifact(str(model_dir / "metadata.json"), artifact_path="metadata")
         mlflow.log_artifact(str(SPLITS_DIR / "test_data.joblib"), artifact_path="splits")
 

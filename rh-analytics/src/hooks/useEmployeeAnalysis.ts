@@ -1,18 +1,10 @@
 // src/hooks/useEmployeeAnalysis.ts
-// Logique d'analyse d'un employé (recherche dans le dataset + predict + explain
-// + survival), partagée entre src/pages/Analyseshap.tsx et src/pages/Assistant.tsx.
+// Analyse d'un employé (recherche dans le dataset + predict + explain + survival),
+// partagée entre Analyseshap.tsx et Assistant.tsx.
 //
-// Pourquoi ce hook : avant, Analyseshap.tsx était la SEULE page à calculer
-// predict/explain/survival. Assistant.tsx se contentait d'envoyer un
-// `employee_number` au backend, qui recalculait de son côté (Mode B) puis
-// laissait le LLM reformuler les chiffres en texte libre — sans jamais
-// afficher la jauge, les facteurs SHAP ou la date de survie dans le chat.
-//
-// Avec ce hook, Assistant.tsx peut effectuer EXACTEMENT le même calcul que
-// Analyseshap.tsx, mettre à jour le même AnalyseContext (donc afficher le
-// même panneau employé dans sa sidebar), et envoyer au backend un contexte
-// déjà précalculé (Mode A) — garantissant des chiffres identiques aux deux
-// endroits.
+// Les deux pages doivent passer par ce hook : c'est ce qui garantit des chiffres
+// identiques de part et d'autre, et un contexte déjà précalculé (Mode A) envoyé au
+// backend plutôt qu'un simple employee_number qu'il recalculerait de son côté.
 
 import { useRef, useCallback } from 'react';
 import { getDataset, predict, explain, survival } from '../api/client';

@@ -1,6 +1,5 @@
 // src/components/layout/Sidebar.tsx
 // Navigation réduite à 4 entrées pour la soutenance.
-// Structure, style et footer conservés à l'identique.
 
 import { NavLink } from 'react-router-dom';
 import {
@@ -46,7 +45,7 @@ export default function Sidebar() {
       transition: 'width 0.2s ease',
     }}>
 
-      {/* Logo — identique à l'original */}
+      {/* Logo */}
       <div style={{
         padding: '1.1rem 1.2rem 1rem',
         borderBottom: '1px solid var(--border)',
@@ -123,7 +122,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Footer — identique à l'original */}
+      {/* Footer */}
       <div style={{
         padding: '0.875rem 1.2rem',
         borderTop: '1px solid var(--border)',

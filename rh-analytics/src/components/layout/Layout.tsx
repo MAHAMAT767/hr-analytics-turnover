@@ -1,5 +1,4 @@
 // src/components/layout/Layout.tsx
-// Ajout de '/analyse-shap' dans TITLES, le reste est identique à l'original.
 
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';

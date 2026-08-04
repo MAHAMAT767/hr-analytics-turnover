@@ -1,10 +1,10 @@
 """
-app/services/mlflow_tracker.py — Wrapper MLflow pour le tracking (version corrigée)
+app/services/mlflow_tracker.py — Wrapper MLflow pour le tracking
 """
 
 import mlflow
 from mlflow.tracking import MlflowClient
-from typing import Dict, Any, Optional
+from typing import Dict
 from pathlib import Path
 from ..core.config import settings
 from ..core.logging import logger
@@ -13,23 +13,19 @@ class MLflowTracker:
     """Wrapper MLflow pour le tracking des expériences (sans model registry)"""
     
     def __init__(self):
-        # ⭐ Configuration explicite avec SQLite comme dans train.py
+        # Backend SQLite, aligné sur celui de train.py
         self.base_dir = Path(__file__).parent.parent.parent
         self.db_path = self.base_dir / "mlflow.db"
         self.mlruns_dir = self.base_dir / "mlruns"
-        
-        # Créer les dossiers
         self.mlruns_dir.mkdir(parents=True, exist_ok=True)
-        
-        # ⭐ Utiliser SQLite comme backend (pas de model registry)
+
         self.tracking_uri = f"sqlite:///{self.db_path.absolute()}"
         mlflow.set_tracking_uri(self.tracking_uri)
-        
-        # ⭐ Ne PAS utiliser set_experiment avec SQLite
-        # À la place, on stocke l'expérience comme métadonnée
+
+        # set_experiment() n'est pas utilisé avec le backend SQLite : l'expérience
+        # est conservée comme métadonnée et résolue à la lecture des runs.
         self.experiment_name = settings.MLFLOW_EXPERIMENT_NAME
-        
-        # Initialiser le client
+
         self.client = MlflowClient(tracking_uri=self.tracking_uri)
         
         logger.info(f"MLflow configuré avec SQLite: {self.tracking_uri}")
@@ -70,10 +66,9 @@ class MLflowTracker:
     def get_experiment_summary(self) -> Dict:
         """Résumé de l'expérience MLflow"""
         try:
-            # ⚠️ FIX : search_runs(experiment_ids=[]) ne cherche dans AUCUNE
-            # expérience et renvoie toujours une liste vide. Il faut d'abord
-            # lister les expériences existantes (créées par train.py) pour
-            # récupérer leurs IDs.
+            # search_runs(experiment_ids=[]) ne cherche dans AUCUNE expérience et
+            # renvoie toujours une liste vide. Il faut d'abord lister les
+            # expériences existantes (créées par train.py) pour récupérer leurs IDs.
             experiments = self.client.search_experiments()
             experiment_ids = [exp.experiment_id for exp in experiments] or ["0"]
 

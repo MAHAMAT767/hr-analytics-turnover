@@ -61,18 +61,6 @@ function BorderBeam({ color = '#6366f1', duration = 5 }: { color?: string; durat
   );
 }
 
-const ShimmerText = ({ text, style }: { text: string; style?: React.CSSProperties }) => (
-  <span style={{
-    background: 'linear-gradient(90deg, var(--text) 0%, var(--primary-light) 45%, var(--text) 90%)',
-    backgroundSize: '200% auto', WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-    animation: 'shim 3s linear infinite', display: 'inline-block', ...style,
-  }}>
-    {text}
-    <style>{`@keyframes shim { 0%{background-position:200% center} 100%{background-position:-200% center} }`}</style>
-  </span>
-);
-
 function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-30px' });
@@ -84,29 +72,6 @@ function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
     >
       {children}
     </motion.div>
-  );
-}
-
-const SHAPBar = ({ pct, color }: { pct: number; color: string }) => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true });
-  return (
-    <div ref={ref} style={{ flex: 1, height: 5, background: 'var(--border)', borderRadius: 6, overflow: 'hidden', position: 'relative' }}>
-      <motion.div
-        initial={{ width: 0 }}
-        animate={inView ? { width: `${pct}%` } : {}}
-        transition={{ duration: 0.85, ease: [0.34, 1.26, 0.64, 1] }}
-        style={{ height: '100%', borderRadius: 6, background: color, boxShadow: `0 0 6px ${color}66`, position: 'relative' }}
-      >
-        <motion.div
-          animate={{ x: ['-100%', '200%'] }}
-          transition={{ duration: 1.4, delay: 0.8, ease: 'easeInOut' }}
-          style={{ position: 'absolute', inset: 0,
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)',
-            borderRadius: 6 }}
-        />
-      </motion.div>
-    </div>
   );
 }
 
@@ -190,9 +155,6 @@ function getRecoGlobale(niveauRisque: string, fiabilite?: string) {
     couleur: 'var(--success)', bg: 'var(--success-bg)', border: 'var(--success-border)',
   };
 }
-
-// toEmployeData déplacée vers src/utils/employeData.ts (partagée avec Assistant.tsx
-// via le hook useEmployeeAnalysis), pour garantir un payload identique partout.
 
 // ── Jauge circulaire SVG ultra-premium ────────────────────────────────
 function GaugeCircle({ pct, couleur }: { pct: number; couleur: string }) {

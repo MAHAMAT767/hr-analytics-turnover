@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { SunIcon, MoonIcon, BellIcon, SearchIcon, ChevronDownIcon, CloseIcon, WifiIcon, WifiOffIcon } from '../ui/Icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useNetworkMonitor, NetworkEvent, NetworkStatus } from '../../hooks/useNetworkMonitor';
