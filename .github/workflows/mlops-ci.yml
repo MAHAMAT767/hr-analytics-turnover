@@ -163,5 +163,5 @@ jobs:
             hr-analytics-mlops:${{ github.sha }}
           sleep 10
           curl -f http://localhost:8000/health || exit 1
-          curl -f http://localhost:8000/mlops/health || exit 1
+          curl -f http://localhost:8000/api/monitoring || exit 1
           docker stop test-container
