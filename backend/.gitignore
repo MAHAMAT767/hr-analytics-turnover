@@ -3,5 +3,6 @@ __pycache__/
 *.pyc
 ml/artifacts/*.pkl
 ml/artifacts/*.png
-data/
+data/*
+!data/WA_Fn-UseC_-HR-Employee-Attrition.csv
 logs/

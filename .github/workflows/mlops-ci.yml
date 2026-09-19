@@ -164,4 +164,7 @@ jobs:
           sleep 10
           curl -f http://localhost:8000/health || exit 1
           curl -f http://localhost:8000/api/monitoring || exit 1
+          # Verifie que le dataset est bien embarque dans l'image
+          curl -f http://localhost:8000/api/stats || exit 1
+          docker logs test-container
           docker stop test-container

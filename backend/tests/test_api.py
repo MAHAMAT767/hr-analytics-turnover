@@ -234,8 +234,20 @@ class TestAPI:
         assert response.json()["status"] == "ok"
 
     def test_predict_endpoint_structure(self, client, sample_employe):
-        """Vérifie que /predict retourne les bons champs."""
-        response = client.post("/api/predict", json=sample_employe)
+        """Vérifie que /predict retourne les bons champs.
+
+        Le pipeline est mocké : model.pkl est un artefact non versionné, absent
+        d'un clone neuf et du runner CI. On teste ici le contrat de l'endpoint,
+        pas la qualité du modèle (couverte par la quality gate du pipeline ML).
+        """
+        from app.services import model_service
+
+        mock_pipeline = MagicMock()
+        mock_pipeline.predict_proba.return_value = np.array([[0.7, 0.3]])
+
+        with patch.object(model_service, "pipeline", mock_pipeline):
+            response = client.post("/api/predict", json=sample_employe)
+
         assert response.status_code == 200
         data = response.json()
         assert "probabilite"  in data

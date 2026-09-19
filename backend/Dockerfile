@@ -16,10 +16,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app/ ./app/
 COPY ml/ ./ml/
+# Le dataset est requis par /api/stats et /api/dataset a l'execution.
+COPY data/ ./data/
 
 # Les artefacts du modèle sont produits par le pipeline ML et injectés au build
 # (etape "Download model artifacts" du CI) ou montes en volume a l'execution.
-RUN mkdir -p ml/artifacts logs data
+RUN mkdir -p ml/artifacts logs
 
 EXPOSE 8000
 

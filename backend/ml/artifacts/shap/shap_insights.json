@@ -1,7 +1,7 @@
 {
   "model_type": "logreg",
   "n_samples_explained": 100,
-  "generated_at": "2026-06-13T16:20:21.110418",
+  "generated_at": "2026-09-19T22:31:26.130253",
   "top_drivers": [
     {
       "rank": 1,

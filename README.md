@@ -116,6 +116,7 @@ Lancer l'API :
 
 ```bash
 uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8000
 ```
 
 Documentation interactive : http://localhost:8000/docs

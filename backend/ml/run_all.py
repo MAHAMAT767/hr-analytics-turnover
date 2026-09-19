@@ -13,12 +13,23 @@ import traceback
 from datetime import datetime
 from pathlib import Path
 
+# La console Windows est en cp1252 et ne sait pas encoder les symboles du
+# rapport final (checkmark, fleche). Meme correctif que dans app/main.py.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8")
+
+# Le dossier logs/ n'est pas versionne : il faut le creer avant le FileHandler,
+# sinon le pipeline echoue des l'import sur un clone neuf (runner CI compris).
+LOG_DIR = Path(__file__).parent.parent / "logs"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler(Path(__file__).parent.parent / "logs" / "ml_pipeline.log"),
+        logging.FileHandler(LOG_DIR / "ml_pipeline.log"),
     ],
 )
 logger = logging.getLogger(__name__)

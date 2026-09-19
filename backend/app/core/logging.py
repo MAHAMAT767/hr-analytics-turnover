@@ -29,7 +29,7 @@ class JSONFormatter(logging.Formatter):
 def setup_logging():
     """Configure le logging structuré"""
     # Logger JSON pour les logs applicatifs
-    json_handler = logging.FileHandler(settings.LOGS_DIR / "app.log")
+    json_handler = logging.FileHandler(settings.LOGS_DIR / "app.log", encoding="utf-8")
     json_handler.setFormatter(JSONFormatter())
     
     # Logger console pour le debug
@@ -45,7 +45,7 @@ def setup_logging():
     
     # Logger spécifique pour les prédictions
     pred_logger = logging.getLogger("predictions")
-    pred_handler = logging.FileHandler(settings.LOGS_DIR / "predictions.jsonl")
+    pred_handler = logging.FileHandler(settings.LOGS_DIR / "predictions.jsonl", encoding="utf-8")
     pred_handler.setFormatter(JSONFormatter())
     pred_logger.addHandler(pred_handler)
     pred_logger.setLevel(logging.INFO)

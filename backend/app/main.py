@@ -4,6 +4,7 @@ app/main.py — Point d'entrée FastAPI avec architecture MLOps unifiée
 
 import asyncio
 import logging
+import sys
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
@@ -13,6 +14,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
 from app.api.routes import predict, stats, dataset, chat, mlops
+
+# La console Windows est en cp1252 et ne sait pas encoder les symboles des logs (✓, ⚠)
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8")
 
 logging.basicConfig(
     level=logging.INFO,

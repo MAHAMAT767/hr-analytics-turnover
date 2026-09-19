@@ -1,9 +1,9 @@
 {
   "model_name": "logreg",
   "threshold": 0.41998322423442513,
-  "version": "20260613_170546",
-  "mlflow_run_id": "ecc754d2fc95443b994971739f817aa1",
-  "trained_at": "2026-06-13T17:05:46.853227",
+  "version": "20260919_223044",
+  "mlflow_run_id": "e356178f255e41ec8c4e8bf43dddd012",
+  "trained_at": "2026-09-19T22:30:44.089737",
   "test_metrics": {
     "roc_auc": 0.8042897751744336,
     "f1": 0.4861111111111111,
