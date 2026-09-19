@@ -5,7 +5,7 @@ pydantic==2.12.3
 pydantic-settings==2.5.2
 python-multipart==0.0.12
 
-# Données & ML
+# Donnees & ML
 pandas==2.2.2
 numpy==2.4.6
 scipy==1.16.3
@@ -13,7 +13,7 @@ scikit-learn==1.9.0
 imbalanced-learn==0.14.2
 joblib==1.5.2
 
-# MLOps & explicabilité
+# MLOps & explicabilite
 mlflow==3.13.0
 shap==0.51.0
 matplotlib==3.8.4
